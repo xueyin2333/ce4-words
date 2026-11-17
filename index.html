@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>四级单词</title>
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23161d27'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' font-family='sans-serif' fill='%233ddc97'%3E%E8%AF%8D%3C/text%3E%3C/svg%3E">
 <style>
 :root{
@@ -201,6 +202,9 @@ function homeHTML(){
   h+='<div class="grid2"><button class="tile" data-act="go:wrong"><b>'+wl+'</b><span>错词复习</span></button>'+
      '<button class="tile" data-act="go:list"><b>'+S.learned.length+'</b><span>已学 / 词表</span></button></div>';
   if(storageOK===false){h+='<div class="notice">⚠️ 浏览器没给本地存储权限，这一轮进度存不下来。请告诉我，我换一种打开方式。</div>';}
+  if(installEvt && !isStandalone()){
+    h+='<button class="primary alt" data-act="install" style="margin-top:12px">📲 装到桌面，全屏用</button>';
+  }
   h+='<div class="foot tiny muted">从 <b style="color:#c7d3e0">'+V.length+'</b> 个四级核心词里抽题　·　<a href="#" data-act="go:settings">设置</a></div>';
   return h;
 }
@@ -348,7 +352,16 @@ function speak(w){
     speechSynthesis.cancel();speechSynthesis.speak(u);
   }catch(e){}
 }
-var armed=false;
+var armed=false, installEvt=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault(); installEvt=e; if(view==='home') render();
+});
+function isStandalone(){
+  try{
+    return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)
+        || navigator.standalone===true;
+  }catch(e){ return false; }
+}
 function resetAll(){
   S=load();S.ver=1;S.seen={};S.learned=[];S.wrong={};S.days={};S.streak=0;S.lastDay=null;
   S.order=shuffle(V.map(function(_,i){return i;}));
@@ -367,6 +380,7 @@ document.addEventListener("click",function(e){
   else if(a==="quit"){view="home";sess=null;render();}
   else if(a==="review"){var ids=wrongList();if(ids.length){newSession(ids,"review");}}
   else if(a.indexOf("perday:")===0){S.perDay=Number(a.split(":")[1]);save();render();}
+  else if(a==="install"){if(installEvt){installEvt.prompt();installEvt=null;setTimeout(render,400);}}
   else if(a==="reset"){armed=true;render();}
   else if(a==="reset2"){armed=false;resetAll();}
   else if(a==="speak"){speak(el.getAttribute("data-w")||"");}
