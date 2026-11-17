@@ -1,4 +1,4 @@
-const C='ce4-20261117-151444';
+const C='ce4-20261117-155335';
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(C).then(function(c){return c.addAll(['./','./index.html']);}).then(function(){return self.skipWaiting();}));
 });

@@ -163,7 +163,7 @@ function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1
 function ydayKey(){return dayKey(new Date(Date.now()-86400000));}
 function today(){var k=dayKey();if(!S.days[k]){S.days[k]={plan:null,done:[],right:0,wrong:0};}return S.days[k];}
 function plan(){var d=today();if(!d.plan){d.plan=S.order.filter(function(i){return !S.seen[i];}).slice(0,S.perDay);save();}return d.plan;}
-function remaining(){var d=today();return d.plan.filter(function(i){return d.done.indexOf(i)<0;});}
+function remaining(){var d=today();if(!d.plan){plan();}return d.plan.filter(function(i){return d.done.indexOf(i)<0;});}
 function wrongList(){return Object.keys(S.wrong).map(Number).filter(function(i){return S.wrong[i]>0;})
   .sort(function(a,b){return S.wrong[b]-S.wrong[a];});}
 function bumpStreak(){var k=dayKey();if(S.lastDay===k){return;}
